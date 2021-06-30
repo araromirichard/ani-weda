@@ -1,32 +1,50 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <v-app>
+
+    <v-main>
+      <router-view/>
+    </v-main>
+  </v-app>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import axios from 'axios'
+import dB from './firebase/firebaseinit'
 
-#nav {
-  padding: 30px;
+export default {
+  name: 'App',
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+  data () {
+    return {
+      APIkey: 'f05769f10f6b590cd6bc26e2df3d315c'
+    }
+  },
 
-    &.router-link-exact-active {
-      color: #42b983;
+  created () {
+    this.getCityWeather()
+  },
+  methods: {
+    getCityWeather () {
+      const firebaseDB = dB.collection('cities')
+
+      firebaseDB.onSnapshot(snap => {
+        snap.docChanges().forEach(async (doc) => {
+          if (doc.type === 'added') {
+            try {
+              const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${doc.doc.data().city}&units=metrics&APPID=${this.APIkey}`)
+              const data = response.data
+              firebaseDB.doc(doc.doc.id).update({
+                currentWeather: data
+              }).then(() => {
+                this.cities.push(doc.doc.data())
+              })
+            } catch (err) {
+              console.log(err)
+            }
+          }
+        })
+      })
     }
   }
 }
-</style>
+</script>
