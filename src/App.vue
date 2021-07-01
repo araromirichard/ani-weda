@@ -1,7 +1,7 @@
 <template>
   <div class="main">
-    <navigation class="navigation" />
-    <router-view />
+    <navigation />
+    <router-view  v-bind:cities="cities"/>
   </div>
 </template>
 
@@ -17,7 +17,8 @@ export default {
   },
   data () {
     return {
-      APIkey: 'f05769f10f6b590cd6bc26e2df3d315c'
+      APIkey: 'f05769f10f6b590cd6bc26e2df3d315c',
+      cities: []
     }
   },
 
@@ -35,7 +36,7 @@ export default {
               const response = await axios.get(
                 `http://api.openweathermap.org/data/2.5/weather?q=${
                   doc.doc.data().city
-                }&units=metrics&APPID=${this.APIkey}`
+                }&units=metric&APPID=${this.APIkey}`
               )
               const data = response.data
               firebaseDB
@@ -65,8 +66,10 @@ export default {
 }
 .main {
   height: 100vh;
-  .navigation {
-    z-index: 99;
+  max-width: 1024px;
+  margin: 0 auto;
+  .container {
+    padding: 20px;
   }
 }
 </style>
